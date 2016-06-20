@@ -28,7 +28,30 @@ def create_hairmix_feature(df):
               'Domestic Longhair',\
               'Domestic Medium Hair']
 
-    df['Hairmix'] = (df.Breed.isin(valids).astype(np.int)
+    df['Hairmix'] = (df.Breed.isin(valids).astype(np.int))
+    return df
+
+def create_pitbull_feature(df):
+    pitbull = df.Breed.str.contains('Pit')
+    df['Pitbull'] = pitbull.astype(np.int)
+    return df
+
+def create_chihuahua_feature(df):
+    chihuahua = df.Breed.str.contains('Chihuahua')
+    df['Chihuahua'] = chihuahua.astype(np.int)
+    return df
+   
+def create_labrador_feature(df):
+    labrador = df.Breed.str.contains('Labrador')
+    df['Labrador'] = labrador.astype(np.int)
+    return df
+
+def generate_breed_features(df):
+    df = create_mixed_feature(df)
+    df = create_hairmix_feature(df)
+    df = create_pitbull_feature(df)
+    df = create_labrador_feature(df)
+    df = create_chihuahua_feature(df)
     return df
 
 fixed = {'Neutered Male': 1, 'Spayed Female': 1, 'Intact Male': 0,\
@@ -56,22 +79,38 @@ def create_age_feature(df):
 
 
 def modify_DateTime_feature(df):
-    df['DateTime'] = df.DateTime.astype(pd.datetime)
+    df['DateTime'] = pd.DatetimeIndex(pd.to_datetime(df.DateTime))
     return df
 
+def create_year_feature(df):
+    df['Year'] = df.DateTime.dt.year
+    return df
+
+def create_month_feature(df):
+    df['Month'] = df.DateTime.dt.month
+    return df
+
+def generate_time_features(df):
+    df = modify_DateTime_feature(df)
+    df = create_year_feature(df)
+    df = create_month_feature(df)
+    return df
+
+    
 def create_outcome_features(df):
-    df = df.join(pd.get_dummies(df.OutcomeType))
+    df = df.join(pd.get_dummies(df.OutcomeType).astype(np.int))
     return df
 
 def clean_data(df):
     df = create_id_feature(df)
-    df = create_mixed_feature(df)
     df = create_cat_feature(df)
+    # Creates several features
+    df = generate_breed_features(df)
     df = create_neutered_feature(df)
     df = create_age_feature(df)
-    df = modify_DateTime_feature(df)
+    df = generate_time_features(df)
     df = create_outcome_features(df)
-    df = create_hairmix_feature(df)
+
     return df
 
 
